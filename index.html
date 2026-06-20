@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>ไห
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFarm - ระบบจัดการฟาร์มอัจฉริยะ</title>
+    <!-- ลิงก์ไปยัง Google Fonts และ Font Awesome สำหรับ ไอคอน -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- ลิงก์ไปยัง Chart.js สำหรับทำกราฟ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- ไฟล์สไตล์ของเรา -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ส่วนหัวและแถบเมนู (Navigation) -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo-area">
+                <img src="images/01.png" alt="SmartFarm Logo" class="logo-img" onerror="this.src='https://via.placeholder.com/40/2e7d32/ffffff?text=SF'">
+                <span class="logo-text">Smart<span>Farm</span></span>
+            </div>
+            
+            <!-- เมนูสำหรับ Desktop -->
+            <nav class="nav-menu" id="navMenu">
+                <a href="#" class="active"><i class="fa-solid fa-chart-pie"></i> แดชบอร์ด</a>
+                <a href="#"><i class="fa-solid fa-seedling"></i> พืชพรรณ</a>
+                <a href="#"><i class="fa-solid fa-droplet"></i> ระบบน้ำ</a>
+                <a href="#"><i class="fa-solid fa-shield-halved"></i> ความปลอดภัย</a>
+                <a href="#" class="logout-btn-mobile"><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</a>
+            </nav>
+
+            <div class="nav-right">
+                <!-- สถานะระบบความปลอดภัย -->
+                <div class="security-status secure" id="securityStatus" onclick="toggleSecurity()">
+                    <i class="fa-solid fa-lock"></i> <span>ระบบปลอดภัย</span>
+                </div>
+                <button class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i></button>
+                <!-- ปุ่มแฮมเบอร์เกอร์สำหรับมือถือ -->
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- เนื้อหาหลัก (Dashboard Layout) -->
+    <main class="dashboard-container">
+        
+        <!-- ส่วนหัวข้อของแดชบอร์ด -->
+        <section class="dashboard-header">
+            <div>
+                <h1>แดชบอร์ดควบคุมฟาร์ม</h1>
+                <p>ข้อมูลอัปเดตล่าสุดเรียลไทม์</p>
+            </div>
+            <div class="time-display" id="currentTime">กำลังโหลดเวลา...</div>
+        </section>
+
+        <!-- การ์ดแสดงค่าต่างๆ (Cards Grid) -->
+        <section class="stats-grid">
+            <!-- การ์ดอุณหภูมิ -->
+            <div class="stat-card">
+                <div class="card-icon temp"><i class="fa-solid fa-temperature-half"></i></div>
+                <div class="card-info">
+                    <h3>อุณหภูมิอากาศ</h3>
+                    <p class="card-value"><span id="tempValue">28.5</span> °C</p>
+                </div>
+            </div>
+            <!-- การ์ดความชื้นในดิน -->
+            <div class="stat-card">
+                <div class="card-icon humidity"><i class="fa-solid fa-faucet-drip"></i></div>
+                <div class="card-info">
+                    <h3>ความชื้นในดิน</h3>
+                    <p class="card-value"><span id="soilHumidValue">65</span> %</p>
+                </div>
+            </div>
+            <!-- การ์ดความเข้มแสง -->
+            <div class="stat-card">
+                <div class="card-icon light"><i class="fa-solid fa-sun"></i></div>
+                <div class="card-info">
+                    <h3>ความเข้มแสง</h3>
+                    <p class="card-value"><span id="lightValue">850</span> Lux</p>
+                </div>
+            </div>
+            <!-- การ์ดระดับน้ำในถัง -->
+            <div class="stat-card">
+                <div class="card-icon water"><i class="fa-solid fa-water"></i></div>
+                <div class="card-info">
+                    <h3>ระดับน้ำในถัง</h3>
+                    <p class="card-value"><span id="waterLevelValue">80</span> %</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ส่วนควบคุมและกราฟ (Controls & Charts) -->
+        <section class="main-content-grid">
+            
+            <!-- ฝั่งสวิตช์ควบคุม -->
+            <div class="content-card controls-section">
+                <h2><i class="fa-solid fa-sliders"></i> สั่งการอุปกรณ์</h2>
+                <div class="control-group">
+                    <div class="control-item">
+                        <div class="control-label">
+                            <i class="fa-solid fa-sprinkler"></i>
+                            <div>
+                                <h4>สปริงเกอร์รดน้ำ</h4>
+                                <small id="status-water">ปิดใช้งาน</small>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="switchWater" onchange="toggleDevice('water')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="control-item">
+                        <div class="control-label">
+                            <i class="fa-solid fa-fan"></i>
+                            <div>
+                                <h4>พัดลมระบายอากาศ</h4>
+                                <small id="status-fan">ปิดใช้งาน</small>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="switchFan" onchange="toggleDevice('fan')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="control-item">
+                        <div class="control-label">
+                            <i class="fa-solid fa-lightbulb"></i>
+                            <div>
+                                <h4>ไฟปลูกพืช (LED)</h4>
+                                <small id="status-light">ปิดใช้งาน</small>
+                            </div>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="switchLight" onchange="toggleDevice('light')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ฝั่งแสดงกราฟวิเคราะห์ -->
+            <div class="content-card chart-section">
+                <h2><i class="fa-solid fa-chart-line"></i> สถิติความชื้นและอุณหภูมิวันนี้</h2>
+                <div class="chart-container">
+                    <canvas id="farmChart"></canvas>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- สคริปต์ควบคุมระบบ -->
+    <script src="js/script.js"></script>
+</body>
+</html>
